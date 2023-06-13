@@ -1,6 +1,7 @@
+import os
+import json
 import requests
 from bs4 import BeautifulSoup
-import json
 from unidecode import unidecode
 
 requests.packages.urllib3.disable_warnings()
@@ -12,7 +13,8 @@ headers = {
     "Origin": "https://tounesbet.com",
     "Connection": "keep-alive",
     "Referer": "https://tounesbet.com/?d=1",
-    "Cookie": "_culture=fr-fr; TimeZone=-60; comm100_visitorguid_5000334=3848f21c-636b-48a4-bd27-f985c28ccd5c; _ga=GA1.2.1975212051.1684962334; _ga_PGQGW1WPHH=GS1.1.1686483390.5.0.1686483390.0.0.0; _gid=GA1.2.732555203.1686406060; DDoS_Protection=b49a758a7389856ae6fd7501550cfd1e; ASP.NET_SessionId=vyfotnjvoe521fwhiuwcxr5q; __RequestVerificationToken=wZHARgHr8x08MnTElKR04zXsG8D0dOxu3wBrcfiB0ZlEienlfVWzpdiW2oLMT34326fCln9yh2XP5fRTqXSlOWdz3_eQ4OYh8WNXVTcTFV01; _gat_gtag_UA_160317988_1=1",
+    "Cookie": 
+    "_culture=fr-fr; _ga_PGQGW1WPHH=GS1.1.1686663687.6.0.1686663687.0.0.0; _ga=GA1.2.947079087.1686555229; TimeZone=-60; _gid=GA1.2.313063078.1686555237; comm100_visitorguid_5000334=bc900b9e-21d4-472e-b41b-e85f2f2136c1; DDoS_Protection=4c172812a4f478a31d78eeb5c5fd940b; ASP.NET_SessionId=tn10olzpx3el5pusuaylbkwh; __RequestVerificationToken=ky1lc0Lxy5VIRY2UGye7_YTfxuu1Vsm_6xb0RfVzNG54Sqo38s0rQEla2LLOAbCchyHa-qjzjOYDh7wFEaBwOyril9J3B2Bm58Z-JCdLSYk1; _gat_gtag_UA_160317988_1=1",
     "Sec-Fetch-Dest": "empty",
     "Sec-Fetch-Mode": "cors",
     "Sec-Fetch-Site": "same-origin",
@@ -29,7 +31,7 @@ def start_foot(foot_id):
     for country_div in soup.find_all('div', {"class": "divSportCategory"}):
         data_sportid = country_div.find('a')["data-sportid"]
         data_sportcategoryid = country_div.find('a')["data-sportcategoryid"]
-        menu_sport_name = country_div.find('span', {"class": "menu-sport-name"}).text
+        menu_sport_name = unidecode(country_div.find('span', {"class": "menu-sport-name"}).text)
 
         f = open(f"./tb/{menu_sport_name}.json", "w")
         json_data = json.dumps(
@@ -49,7 +51,7 @@ def get_tours(SportId, SportCategoryId):
     tours = {}
     for tour_div in soup.find_all('div', {"class": "divTournament"}):
         data_tournamentid = tour_div.find('a')["data-tournamentid"]
-        menu_sport_name = tour_div.find('span', {"class": "menu-sport-name"}).text
+        menu_sport_name = unidecode(tour_div.find('span', {"class": "menu-sport-name"}).text)
 
         tours[menu_sport_name] = get_dates(SportId, country_id, data_tournamentid)
 
@@ -102,4 +104,10 @@ def get_match(tr_match):
     
     return {"time": time, "comp1": competitor1, "comp2": competitor2, "odds": odds}
 
+def rm_files():
+    tb_files = os.listdir("./tb/")
+    for f in tb_files:
+        os.remove("./tb/"+f)
+        
+rm_files()
 start_foot("1181")
